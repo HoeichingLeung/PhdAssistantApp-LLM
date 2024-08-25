@@ -3,7 +3,7 @@ import transformers
 import numpy as np  
 import streamlit as st  
 from typing import List  
-
+from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM
 # 定义模型路径  
 model_path = './LLM-Research/Meta-Llama-3-8B-Instruct'  
 embedding_model_path = 'BCEmbeddingmodel'  
