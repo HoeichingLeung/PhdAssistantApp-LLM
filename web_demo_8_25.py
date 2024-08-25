@@ -32,7 +32,7 @@ class LLM:
         print("Creating model...")  
         self.model = transformers.AutoModelForCausalLM.from_pretrained(  
             model_path,  
-            torch_dtype=torch.float16 # 使用半精度
+            torch_dtype=torch.float32  # 使用float32，避免在CPU上使用float16
         ).to(device)  # 将模型加载到指定设备
         print(f'Loading Llama 3 model from {model_path}.')  
         self.device = device  # 保存设备信息
@@ -62,7 +62,7 @@ class EmbeddingModel:
         self.device = device  
         self.model.to(self.device)  
     
-    def get_embeddings(self, sentences: List[str], batch_size: int = 4) -> np.ndarray:  
+    def get_embeddings(self, sentences: List[str], batch_size: int = 2) -> np.ndarray:  # 将批次大小减少到2
         all_embeddings = []  
         for i in range(0, len(sentences), batch_size):  
             batch = sentences[i:i + batch_size]  
@@ -73,6 +73,10 @@ class EmbeddingModel:
             embeddings = outputs.last_hidden_state[:, 0]  
             embeddings = embeddings / embeddings.norm(dim=1, keepdim=True)  
             all_embeddings.append(embeddings.cpu().numpy())  
+            
+            # 手动释放不再需要的变量
+            del inputs, inputs_on_device, outputs
+            torch.cuda.empty_cache()  # 虽然在CPU上不需要，但可以用于释放未使用的内存
         return np.vstack(all_embeddings)  
 
 # 定义向量库索引类  
@@ -186,6 +190,7 @@ if user_input:
     with st.chat_message("assistant"):  
         st.write(response)  
 
+# 重新显示聊天记录  
 for role, message in st.session_state["chat_history"]:  
     with st.chat_message(role):  
         st.write(message)
