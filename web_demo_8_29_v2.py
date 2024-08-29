@@ -180,3 +180,12 @@ if user_input := st.chat_input("请输入您的问题:"):
     # Output the model's response  
     st.session_state.messages.append({"role": "assistant", "content": response})  
     st.chat_message("assistant").write(response)
+
+'''
+demo多轮提问设计：
+选择area后，以System为例
+1. Recommend professors in Cornell University.
+2. Tell me more about [Professors's name].
+3. What is the rank of Cornell University?
+4. What is the homepage of [Professors's name]?
+'''
