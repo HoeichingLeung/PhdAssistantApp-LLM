@@ -6,7 +6,7 @@ from typing import List
 from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM  
 
 # 定义模型路径  
-model_path = './LLM-Research/Meta-Llama-3-8B-Instruct'  
+model_path = './IEITYuan/Yuan2-2B-Mars-hf'
 embedding_model_path = 'BCEmbeddingmodel'  
 
 # 文本切分类  
@@ -35,14 +35,12 @@ class LLM:
             torch_dtype=torch.bfloat16  
         ).cuda()  
 
-        print(f'Loading Llama 3 model from {model_path}.')  
+        print(f'Loading Yuan2.0 model from {model_path}.')  
 
     def generate(self, question: str, context: list):  
         if context:  
             prompt = (  
-                f'Background: {context}\n'  
-                "I am currently applying for a Ph.D. in computer science, "  
-                "and the above background provides academic information about schools and professors. "  
+                f'Background: {context}\n' 
                 "Please answer my question: "  
                 f"{question}\n<|start_of_answer|>"  
             )  
@@ -125,17 +123,17 @@ class VectorStoreIndex:
 # 使用会话状态管理模型  
 if 'llm' not in st.session_state:  
     st.session_state.llm = LLM(model_path)  
-    print('LLM模型已初始化。')  
+    print('LLM模型已初始化')  
 
 if 'embed_model' not in st.session_state:  
     st.session_state.embed_model = EmbeddingModel(embedding_model_path)  
-    print('嵌入模型已初始化。')  
+    print('嵌入模型已初始化')  
 
 if 'index' not in st.session_state:  
     chunker = TextSplitter(max_chunk_size=256, overlap=50)  
     document_path = './test.txt'  
     st.session_state.index = VectorStoreIndex(document_path, st.session_state.embed_model, chunker)  
-    print('索引已初始化。')  
+    print('索引已初始化')  
 
 # 页面布局  
 st.set_page_config(page_title="CS PhD申请助手", layout="wide")  
@@ -180,12 +178,3 @@ if user_input := st.chat_input("请输入您的问题:"):
     # Output the model's response  
     st.session_state.messages.append({"role": "assistant", "content": response})  
     st.chat_message("assistant").write(response)
-
-'''
-demo多轮提问设计：
-选择area后，以System为例
-1. Recommend professors in Cornell University.
-2. Tell me more about [Professors's name].
-3. What is the rank of Cornell University?
-4. What is the homepage of [Professors's name]?
-'''
